@@ -14,7 +14,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/todos", async (Guid? listId, bool? completed, TodoDbContext db, CancellationToken ct) =>
+app.MapGet("/todos", async ([FromQuery] Guid? listId, [FromQuery] bool? completed, [FromServices] TodoDbContext db, CancellationToken ct) =>
 {
     var todos = await db.Todos
         .Where(todo => listId == null || todo.ListId == listId)
@@ -24,7 +24,7 @@ app.MapGet("/todos", async (Guid? listId, bool? completed, TodoDbContext db, Can
     return Results.Ok(todos);
 });
 
-app.MapPost("/todos", async ([FromBody] CreateTodoCommand command, TodoDbContext db, CancellationToken ct) =>
+app.MapPost("/todos", async ([FromBody] CreateTodoCommand command, [FromServices] TodoDbContext db, CancellationToken ct) =>
 {
     var todoItem = new TodoItem { Name = command.Name, ListId = command.ListId };
     db.Todos.Add(todoItem);
@@ -32,14 +32,14 @@ app.MapPost("/todos", async ([FromBody] CreateTodoCommand command, TodoDbContext
     return Results.Created($"/todos/{todoItem.Id}", todoItem);
 });
 
-app.MapGet("/todos/{id:guid}", async ([FromRoute] Guid id, TodoDbContext db, CancellationToken ct) =>
+app.MapGet("/todos/{id:guid}", async ([FromRoute] Guid id, [FromServices] TodoDbContext db, CancellationToken ct) =>
 {
     var todoItem = await db.Todos.FindAsync(new object[] { id }, ct);
     if (todoItem is null) return Results.NotFound();
     return Results.Ok(todoItem);
 });
 
-app.MapPut("/todos/{id:guid}/complete", async ([FromRoute] Guid id, TodoDbContext db, CancellationToken ct) =>
+app.MapPut("/todos/{id:guid}/complete", async ([FromRoute] Guid id, [FromServices] TodoDbContext db, CancellationToken ct) =>
 {
     var todoItem = await db.Todos.FindAsync(new object[] {id}, ct);
     if (todoItem is null) return Results.NotFound();

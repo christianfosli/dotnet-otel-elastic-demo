@@ -15,9 +15,9 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/todo-lists", async (TodoListDbContext db, CancellationToken ct) => await db.TodoLists.ToListAsync(ct));
+app.MapGet("/todo-lists", async ([FromServices] TodoListDbContext db, CancellationToken ct) => await db.TodoLists.ToListAsync(ct));
 
-app.MapPost("/todo-lists", async ([FromBody] CreateTodoListCommand command, TodoListDbContext db, CancellationToken ct) =>
+app.MapPost("/todo-lists", async ([FromBody] CreateTodoListCommand command, [FromServices] TodoListDbContext db, CancellationToken ct) =>
 {
     var todoList = new TodoList { Name = command.Name };
     db.TodoLists.Add(todoList);
@@ -25,7 +25,7 @@ app.MapPost("/todo-lists", async ([FromBody] CreateTodoListCommand command, Todo
     return Results.Created($"/todo-lists/{todoList.Id}", todoList);
 });
 
-app.MapGet("/todo-lists/{id:guid}", async ([FromRoute] Guid id, TodoListDbContext db, TodoItemService itemService,
+app.MapGet("/todo-lists/{id:guid}", async ([FromRoute] Guid id, [FromServices] TodoListDbContext db, [FromServices] TodoItemService itemService,
     CancellationToken ct) =>
 {
     var todoList = await db.TodoLists.FindAsync(new object[] { id }, ct);
@@ -46,7 +46,7 @@ record GetTodoListResponse(Guid Id, string? Name, List<TodoListItem> Todos);
 record TodoListItem
 {
     public Guid Id { get; init; }
-    public string Name { get; init; }
+    public string? Name { get; init; }
     public bool Completed { get; init; }
 }
 
