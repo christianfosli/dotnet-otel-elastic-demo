@@ -5,3 +5,9 @@ Open Telemetry and visualize it using the Elastic stack.
 
 But I didn't finish anything yet, so don't expect anything here to work just yet
 :sweat_smile:
+
+### Branches
+
+* before-otel: starting point for blog post guide
+
+* main: with otel implemented
