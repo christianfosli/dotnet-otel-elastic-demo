@@ -4,9 +4,9 @@ set -eo pipefail
 
 printf 'Building services with docker\n'
 cd TodoListService
-docker build -t todo-list:before-otel .
+docker build -t todo-list:latest .
 cd ../TodoItemService
-docker build -t todo-item:before-otel .
+docker build -t todo-item:latest .
 cd ..
 
 printf 'Setting up namespace\n'

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: todoitem
-        image: todo-item:before-otel
+        image: todo-item:latest
         imagePullPolicy: Never # Build with docker desktop
         ports:
         - containerPort: 80
@@ -26,6 +26,12 @@ spec:
               key: SA_PASSWORD
         - name: DbConnectionString
           value: Server=tcp:mssql-svc; Database=TodoItemDb; User Id=sa; Password=$(DB_PASSWORD);
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://apm:8200
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: grpc
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "deployment.environment=local"
 ---
 apiVersion: v1
 kind: Service

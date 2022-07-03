@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,13 @@ builder.Services.AddDbContext<TodoDbContext>(opt => opt.UseSqlServer(dbConnectio
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddOpenTelemetryTracing(otelBuilder => otelBuilder
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: "MyCompany.MyProject.TodoItemService"))
+    .AddAspNetCoreInstrumentation()
+    .AddHttpClientInstrumentation()
+    .AddSqlClientInstrumentation()
+    .AddOtlpExporter());
 
 var app = builder.Build();
 
