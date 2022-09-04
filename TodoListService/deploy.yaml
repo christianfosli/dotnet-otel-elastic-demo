@@ -18,6 +18,14 @@ spec:
         imagePullPolicy: Never # Build with docker desktop
         ports:
         - containerPort: 80
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mssql
+              key: SA_PASSWORD
+        - name: DbConnectionString
+          value: Server=tcp:mssql-svc; Database=TodoListDb; User Id=sa; Password=$(DB_PASSWORD);
 ---
 apiVersion: v1
 kind: Service
