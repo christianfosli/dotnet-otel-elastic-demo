@@ -48,6 +48,21 @@ app.MapPut("/todos/{id:guid}/complete", async ([FromRoute] Guid id, [FromService
     return Results.Ok();
 });
 
+using (var dbInitScope = app.Services.CreateScope())
+{
+    var db = dbInitScope.ServiceProvider.GetRequiredService<TodoDbContext>();
+    var logger = dbInitScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var created = await db.Database.EnsureCreatedAsync();
+    if (created)
+    {
+        logger.LogInformation("Created database and tables for EF Core");
+    }
+    else
+    {
+        logger.LogInformation("Database already exists");
+    }
+}
+
 app.Run();
 
 record CreateTodoCommand(Guid? ListId, string Name);

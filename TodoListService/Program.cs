@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetValue<string>("DbConnectionString");
 builder.Services.AddDbContext<TodoListDbContext>(opt => opt.UseSqlServer(dbConnectionString));
+builder.Services.AddHttpClient<TodoItemService>(opt => opt.BaseAddress = new Uri("http://todo-item-svc"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -38,6 +39,21 @@ app.MapGet("/todo-lists/{id:guid}", async ([FromRoute] Guid id, [FromServices] T
         Todos: todos
     ));
 });
+
+using (var dbInitScope = app.Services.CreateScope())
+{
+    var db = dbInitScope.ServiceProvider.GetRequiredService<TodoListDbContext>();
+    var logger = dbInitScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var created = await db.Database.EnsureCreatedAsync();
+    if (created)
+    {
+        logger.LogInformation("Created database and tables for EF Core");
+    }
+    else
+    {
+        logger.LogInformation("Database already exists");
+    }
+}
 
 app.Run();
 
