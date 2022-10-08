@@ -28,5 +28,6 @@ else
 fi
 
 kubectl apply -f ./infra/mssql.yaml
+kubectl apply -f ./infra/elastic-stack.yaml
 kubectl apply -f ./TodoItemService/deploy.yaml
 kubectl apply -f ./TodoListService/deploy.yaml
