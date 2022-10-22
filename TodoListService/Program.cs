@@ -57,9 +57,9 @@ using (var dbInitScope = app.Services.CreateScope())
 
 app.Run();
 
-record CreateTodoListCommand(string Name);
-record GetTodoListResponse(Guid Id, string? Name, List<TodoListItem> Todos);
-record TodoListItem
+public record CreateTodoListCommand(string Name);
+public record GetTodoListResponse(Guid Id, string? Name, List<TodoListItem> Todos);
+public record TodoListItem
 {
     public Guid Id { get; init; }
     public string? Name { get; init; }
@@ -72,22 +72,25 @@ public class TodoList
     public string? Name { get; set; }
 }
 
-class TodoListDbContext : DbContext
+public class TodoListDbContext : DbContext
 {
     public TodoListDbContext(DbContextOptions<TodoListDbContext> options) : base(options) { }
     public DbSet<TodoList> TodoLists => Set<TodoList>();
 }
 
-class TodoItemService
+public class TodoItemService
 {
     private readonly HttpClient _httpClient;
+    private static JsonSerializerOptions SerializerOpts = new() { PropertyNameCaseInsensitive = true };
+
     public TodoItemService(HttpClient httpClient) => _httpClient = httpClient;
 
     public async Task<List<TodoListItem>> GetTodosByListId(Guid listId, CancellationToken ct)
     {
         var response = await _httpClient.GetAsync($"/todos?listId={listId}", ct);
         response.EnsureSuccessStatusCode();
-        var todos = JsonSerializer.Deserialize<List<TodoListItem>>(await response.Content.ReadAsStreamAsync(ct));
+        var todos = JsonSerializer.Deserialize<List<TodoListItem>>(
+            await response.Content.ReadAsStreamAsync(ct), SerializerOpts);
         return todos ?? new List<TodoListItem>();
     }
 }
